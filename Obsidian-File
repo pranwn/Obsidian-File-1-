@@ -14,9 +14,7 @@ def write_markdown_file(file_path, content):
 
 # Function to append content to an existing markdown file
 def append_to_markdown_file(file_path, content):
-    """
-    Appends content to an existing markdown file.
-    """
+
     with open(file_path, 'a', encoding='utf-8') as file:
         file.write(content)
 
