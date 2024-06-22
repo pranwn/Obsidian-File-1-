@@ -2,47 +2,50 @@ import re
 
 # Function to read the content of a markdown file
 def read_markdown_file(file_path):
-    #Reads the entire content of a markdown file.
+
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
 
 # Function to write content to a markdown file (overwrites existing content)
 def write_markdown_file(file_path, content):
-    #Writes content to a markdown file. This will overwrite any existing content.
 
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(content)
 
 # Function to append content to an existing markdown file
 def append_to_markdown_file(file_path, content):
-    #Appends content to an existing markdown file.
+    """
+    Appends content to an existing markdown file.
+    """
     with open(file_path, 'a', encoding='utf-8') as file:
         file.write(content)
 
 # Function to convert markdown content to Obsidian-compatible markdown
 def convert_to_obsidian_markdown(content):
-    #Converts standard markdown content to Obsidian-compatible markdown.
+    """
+    Converts standard markdown content to Obsidian-compatible markdown.
+    """
     # Convert links to Obsidian internal links
-
     content = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'[[\1]]', content)
 
     # Add front matter (optional)
-    front_matter = content = front_matter + content
+    front_matter = """---
+tags: [example-tag]
+---
+"""
+    content = front_matter + content
 
     return content
 
 # Main script execution
 if __name__ == "__main__":
-    # Define the file path for the markdown file
     file_path = 'notes.md'
 
-    # Try to read the current content of the file
     try:
         current_content = read_markdown_file(file_path)
         print("Current Content:")
         print(current_content)
     except FileNotFoundError:
-        # If the file does not exist, create it with initial content
         initial_content = "# My Notes\n\nThis is the initial content of the notes file."
         write_markdown_file(file_path, initial_content)
         current_content = initial_content
