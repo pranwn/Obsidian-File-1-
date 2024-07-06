@@ -1,72 +1,48 @@
-import re
+import xml.etree.ElementTree as ET
 
-# Function to read the content of a markdown file
-def read_markdown_file(file_path):
 
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return file.read()
-
-# Function to write content to a markdown file (overwrites existing content)
-def write_markdown_file(file_path, content):
-
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(content)
-
-# Function to append content to an existing markdown file
-def append_to_markdown_file(file_path, content):
-
-    with open(file_path, 'a', encoding='utf-8') as file:
-        file.write(content)
-
-# Function to convert markdown content to Obsidian-compatible markdown
-def convert_to_obsidian_markdown(content):
+def parse_node(node, depth=0):
     """
-    Converts standard markdown content to Obsidian-compatible markdown.
+    Recursive function to parse each node and convert to markdown format.
     """
-    # Convert links to Obsidian internal links
-    content = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'[[\1]]', content)
+    markdown = ''
+    # Create markdown line for this node, indenting based on depth
+    markdown += f"{'  ' * depth}- {node.get('TEXT')}\n"
 
-    # Add front matter (optional)
-    front_matter = """---
-tags: [example-tag]
----
-"""
-    content = front_matter + content
+    # Process child nodes recursively
+    for child in node.findall('node'):
+        markdown += parse_node(child, depth + 1)
 
-    return content
+    return markdown
 
-# Main script execution
-if __name__ == "__main__":
-    file_path = 'notes.md'
 
+def mm_to_markdown(file_path):
+    """
+    Reads an .mm file and converts its XML content to Markdown format.
+    """
     try:
-        current_content = read_markdown_file(file_path)
-        print("Current Content:")
-        print(current_content)
-    except FileNotFoundError:
-        initial_content = "# My Notes\n\nThis is the initial content of the notes file."
-        write_markdown_file(file_path, initial_content)
-        current_content = initial_content
-        print("File created with initial content:")
-        print(current_content)
+        # Parse the XML from the file
+        tree = ET.parse(file_path)
+        root = tree.getroot()
 
-    # Define new content to add to the file
-    new_content = "\n\n## New Section\n\nHere are some new notes."
+        # Assume that the root <map> element contains a single <node> child
+        if root.tag == 'map':
+            main_node = root.find('node')
+            if main_node is not None:
+                return parse_node(main_node)
+        return "Invalid XML structure"
+    except Exception as e:
+        return f"An error occurred: {e}"
 
-    # Append the new content to the existing content
-    append_to_markdown_file(file_path, new_content)
 
-    # Read and display the updated content of the file
-    updated_content = read_markdown_file(file_path)
-    print("\nUpdated Content:")
-    print(updated_content)
+# File path to your .mm file
+file_path = r'C:\Users\mypc\Desktop\Code camp.mm'
 
-    # Convert to Obsidian-compatible markdown
-    obsidian_content = convert_to_obsidian_markdown(updated_content)
-
-    # Write the converted content to a new file
-    obsidian_file_path = 'obsidian_notes.md'
-    write_markdown_file(obsidian_file_path, obsidian_content)
-
-    print("\nObsidian Markdown Content:")
-    print(obsidian_content)
+# Convert and print the markdown output
+markdown_output = mm_to_markdown(file_path)
+print(markdown_output)
+#save this as a markdown file with the same name as freemind file
+#Take a batch of freemind files and then convert those into multiple markdown files
+#Handle the linking part
+#Internet Links
+#Desktop App Links
